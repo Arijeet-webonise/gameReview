@@ -1,0 +1,5 @@
+#/bin/bash
+
+goose up
+
+xo pgsql://<user_name>:<password>@<host>/<db_name>?sslmode=disable -o internal/models --suffix=.go --template-path templates/

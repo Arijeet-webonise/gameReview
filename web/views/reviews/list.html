@@ -1,0 +1,23 @@
+
+{{ define "content" }}
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Developer</th>
+      <th>Rating</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range $g, $i := .Games }}
+      <tr>
+        <td>{{ $i.ID }}</td>
+        <td>{{ $i.Title }}</td>
+        <td>{{ $i.Developer.String }}</td>
+        <td>{{ $i.Rating }}</td>
+      </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}

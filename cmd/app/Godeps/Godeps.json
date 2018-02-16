@@ -1,0 +1,59 @@
+{
+	"ImportPath": "github.com/Arijeet-webonise/gameReview/cmd/app",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "1.0.2-4-g5ff5dd8",
+			"Rev": "5ff5dd844dfeb4e23e27528f79f1f845bc8bb78f"
+		},
+		{
+			"ImportPath": "github.com/go-zoo/bone",
+			"Comment": "1.2-31-g031b400",
+			"Rev": "031b4005dfe248ccba241a0c9de0f9e112fd6b7c"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/app",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/app/models",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/pkg/database",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/pkg/framework",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/pkg/logger",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/Arijeet-webonise/gameReview/pkg/templates",
+			"Rev": "8ec2134c4ee5975deff5bbf038c34ae34bb1274b"
+		},
+		{
+			"ImportPath": "github.com/knq/dburl",
+			"Rev": "2406b5c3c3d0d9ed027c66db23ff3f271c370c69"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-195-g83612a5",
+			"Rev": "83612a56d3dd153a94a629cd64925371c9adad78"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-195-g83612a5",
+			"Rev": "83612a56d3dd153a94a629cd64925371c9adad78"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "83801418e1b59fb1880e363299581ee543af32ca"
+		}
+	]
+}

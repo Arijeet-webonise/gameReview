@@ -1,0 +1,86 @@
+
+{{ define "content" }}
+<style>
+.ck-editor__editable {
+    min-height: 150px;
+}
+</style>
+<div class="container">
+  <div class="col-sm-8">
+    <label>Summary</label>
+    <summary class="well comment">
+      {{ .Game.Summary.String }}
+    </summary>
+    <video id="my-video" class="video-js" controls preload="auto" width="640" height="264"
+  data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube", "src": "https://www.youtube.com/watch?v=VFvc-JdChk0"}] }'
+  >
+  </video>
+    <div>
+      <form action="commentSubmit" method="get">
+        <input type="hidden" name="id" value="{{ .Game.ID }}">
+        Rating:
+        <div class="form-group">
+          <input type="hidden" name="rating" id="rating" class="form-control">
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary ratingBtn">1</button>
+            <button type="button" class="btn btn-primary ratingBtn">2</button>
+            <button type="button" class="btn btn-primary ratingBtn">3</button>
+            <button type="button" class="btn btn-primary ratingBtn">4</button>
+            <button type="button" class="btn btn-primary ratingBtn">5</button>
+            <button type="button" class="btn btn-primary ratingBtn">6</button>
+            <button type="button" class="btn btn-primary ratingBtn">7</button>
+            <button type="button" class="btn btn-primary ratingBtn">8</button>
+            <button type="button" class="btn btn-primary ratingBtn">9</button>
+            <button type="button" class="btn btn-primary ratingBtn">10</button>
+          </div>
+        </div>
+        <textarea name="comment" id="editor">
+        </textarea><br>
+        <input type="submit" name="submit" class="btn">
+      </form>
+    </div>
+    <div>
+      <label>Comments:</label>
+      {{ range $i, $c := .Comments }}
+        <div class="well">
+          Rating: {{ $c.Rating }}
+          <div class="well comment">{{ $c.Comment }}</div>
+        </div>
+      {{ end }}
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <img src="/static/upload/img/{{ .Game.ImageName.String }}">
+    <h2>{{ .Game.Title }}</h2>
+    <div>User Rating: {{ .Rating }}</div>
+    <div>Developed By: {{ .Game.Developer.String }}</div>
+    <div>Rating: <a href="http://www.esrb.org/ratings/ratings_guide.aspx"><img src="https://esrbstorage.blob.core.windows.net/esrbcontent/images/{{ .Game.Rating }}.png" alt="{{ .Game.Rating }} rating"></a> </div>
+    <div>
+      Genre: {{ range $i, $g := .Genres }}{{ if eq $i 0 }}{{else}}, {{ end }}{{ $g.Name }}{{ end }}
+    </div>
+  </div>
+</div>
+<script>
+function htmlDecode(input){
+  var doc = new DOMParser().parseFromString(input, "text/html");
+  return doc.documentElement.textContent;
+}
+$(document).ready(function (e){
+  var comments = $('.comment');
+  for (var i = 0; i < comments.length; i++) {
+    comments[i].innerHTML = htmlDecode(comments[i].innerHTML);
+  }
+
+  $(".ratingBtn").click(function () {
+    $(".ratingBtn.disabled").removeClass("disabled");
+    $(this).addClass("disabled");
+    $("#rating").val($(this).html());
+  });
+});
+  ClassicEditor
+    .create(document.querySelector('#editor'))
+    .catch(error => {
+      console.error(error);
+    });
+</script>
+{{ end }}

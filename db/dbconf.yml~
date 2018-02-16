@@ -1,0 +1,7 @@
+test:
+  driver: postgres
+  open: user=local password=toor dbname=pokemon sslmode=disable
+
+development:
+  driver: postgres
+  open: user=local password=toor dbname=pokemon sslmode=disable

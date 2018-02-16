@@ -1,0 +1,43 @@
+
+{{ define "content" }}
+<div class="container">
+  <form action="addSubmit" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Title *</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label>Summary *</label>
+      <textarea name="addReview" id="editor" required>
+      </textarea>
+    </div>
+    <div class="form-group">
+      <label>Developer</label>
+      <input type="text" name="developer" class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Rating</label>
+      <select name="rating" class="form-control">
+        <option value="eC">Early Childhood (eC)</option>
+        <option value="E">Everyone (E)</option>
+        <option value="E10">Everyone 10+ (E10+)</option>
+        <option value="E10">Teen (T)</option>
+        <option value="m17">Mature (M17+)</option>
+        <option value="Ao">Adults (Ao)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Image</label>
+      <input type="file" name="reviewimage" class="form-control">
+    </div>
+    <button type="submit" name="submit" class="btn">Submit</button>
+  </form>
+</div>
+  <script>
+    ClassicEditor
+      .create(document.querySelector('#editor'))
+      .catch(error => {
+        console.error(error);
+      });
+  </script>
+{{end}}
