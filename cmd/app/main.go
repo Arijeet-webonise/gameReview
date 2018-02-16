@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Arijeet-webonise/gameReview/app"
+	"github.com/Arijeet-webonise/gameReview/app/models"
 	"github.com/Arijeet-webonise/gameReview/pkg/database"
 	"github.com/Arijeet-webonise/gameReview/pkg/logger"
 	"github.com/Arijeet-webonise/gameReview/pkg/templates"
@@ -78,15 +79,36 @@ func main() {
 		panic("the configuration wasnt enabled")
 	}
 
+	reviewService := &models.GameServiceImpl{
+		DB: dbConn,
+	}
+
+	ggrs := &models.GenretogamerelationServiceImpl{
+		DB: dbConn,
+	}
+
+	commentService := &models.CommentServiceImpl{
+		DB: dbConn,
+	}
+
+	ratingViewService := &models.RatingViewServiceImpl{
+		DB: dbConn,
+	}
+
 	a := &app.App{
-		Router:    router,
-		Cfg:       cfg,
-		Log:       log,
-		TplParser: &templates.TemplateParser{},
-		DB:        dbConn,
+		Router:                     router,
+		Cfg:                        cfg,
+		Log:                        log,
+		TplParser:                  &templates.TemplateParser{},
+		DB:                         dbConn,
+		ReviewService:              reviewService,
+		GenretogamerelationService: ggrs,
+		CommentService:             commentService,
+		RatingViewService:          ratingViewService,
 	}
 
 	a.InitRouter()
+
 	err = http.ListenAndServe(cfg.Port, router)
 	if err != nil {
 		panic(err)

@@ -22,10 +22,7 @@ func (app *App) RenderReviewList(w http.ResponseWriter, r *http.Request) {
 		"./web/views/footer.html",
 		"./web/views/reviews/list.html"}
 
-	reviewService := models.GameServiceImpl{
-		DB: app.DB,
-	}
-	games, err := reviewService.GetAllGames()
+	games, err := app.ReviewService.GetAllGames()
 
 	if err != nil {
 		app.Log.Error(err)
@@ -55,30 +52,23 @@ type CommentChanStuct struct {
 	Comments []*models.Comment
 }
 
-func GetGame(gameChan chan GameChanStuct, id int, app *App) {
-	defer wg.Done()
-	reviewService := models.GameServiceImpl{
-		DB: app.DB,
-	}
+func GetGame(id int, app *App) (GameChanStuct, error) {
 
-	game, err := reviewService.GameByID(id, id)
+	game, err := app.ReviewService.GameByID(id, id)
 
 	if err != nil {
-		app.Log.Error(err)
+		return GameChanStuct{Game: game}, err
 	}
 	data := GameChanStuct{
 		Game: game,
 	}
-	gameChan <- data
+	return data, nil
 }
 
 func GetGenre(genresChan chan GenreChanStuct, id int, app *App) {
 	defer wg.Done()
 
-	genreService := models.GenretogamerelationServiceImpl{
-		DB: app.DB,
-	}
-	genretogames, err := genreService.GetGenreOfGame(id)
+	genretogames, err := app.GenretogamerelationService.GetGenreOfGame(id)
 	if err != nil {
 		app.Log.Error(err)
 	}
@@ -101,11 +91,8 @@ func GetGenre(genresChan chan GenreChanStuct, id int, app *App) {
 
 func GetComments(commentChan chan CommentChanStuct, id int, app *App) {
 	defer wg.Done()
-	commentService := models.CommentServiceImpl{
-		DB: app.DB,
-	}
 
-	comments, err := commentService.GetGameComments(id)
+	comments, err := app.CommentService.GetGameComments(id)
 
 	if err != nil {
 		app.Log.Error(err)
@@ -119,11 +106,8 @@ func GetComments(commentChan chan CommentChanStuct, id int, app *App) {
 
 func GetUserRating(userRating chan int, app *App, gameid int) {
 	defer wg.Done()
-	ratingService := models.RatingViewServiceImpl{
-		DB: app.DB,
-	}
 
-	rating, err := ratingService.GetGameTotalRating(gameid)
+	rating, err := app.RatingViewService.GetGameTotalRating(gameid)
 
 	if err != nil {
 		app.Log.Error(err)
@@ -156,12 +140,7 @@ func (app *App) SubmitComments(w http.ResponseWriter, r *http.Request) {
 		Rating:  rating,
 	}
 
-	fmt.Println(newComment)
-	commentService := models.CommentServiceImpl{
-		DB: app.DB,
-	}
-
-	err = commentService.InsertComment(newComment)
+	err = app.CommentService.InsertComment(newComment)
 
 	if err != nil {
 		app.Log.Error(err)
@@ -178,16 +157,21 @@ func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(bone.GetValue(r, "id"))
 	if err != nil {
 		app.Log.Error(err)
+		app.Router.HandleNotFound(w, r)
+		return
 	}
 
-	gameChan := make(chan GameChanStuct, 1)
 	genresChan := make(chan GenreChanStuct, 1)
 	commentChan := make(chan CommentChanStuct, 1)
 	userRatingChan := make(chan int, 1)
 
 	var genres []*models.Genre
-	go GetGame(gameChan, id, app)
-	wg.Add(1)
+	games, err := GetGame(id, app)
+	if err != nil {
+		app.Log.Error(err)
+		app.Router.HandleNotFound(w, r)
+		return
+	}
 
 	go GetGenre(genresChan, id, app)
 	wg.Add(1)
@@ -199,18 +183,12 @@ func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 
 	wg.Wait()
-	close(gameChan)
 	close(genresChan)
 	close(commentChan)
 	close(userRatingChan)
 
-	var game *models.Game
 	var comments []*models.Comment
 	var rating int
-
-	for elem := range gameChan {
-		game = elem.Game
-	}
 
 	for elem := range genresChan {
 		genres = elem.Genre
@@ -229,7 +207,7 @@ func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
 		Genres   []*models.Genre
 		Comments []*models.Comment
 		Rating   int
-	}{game, genres, comments, rating}
+	}{games.Game, genres, comments, rating}
 
 	res, err := app.TplParser.ParseTemplate(tmplList, data)
 	if err != nil {
@@ -267,6 +245,7 @@ func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.Log.Error(err)
+		r.Response.StatusCode = http.StatusNotFound
 	}
 	img, header, err := r.FormFile("reviewimage")
 
@@ -292,11 +271,7 @@ func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
 		ImageName: sql.NullString{String: header.Filename, Valid: true},
 	}
 
-	gameService := models.GameServiceImpl{
-		DB: app.DB,
-	}
-
-	err = gameService.InsertGame(game)
+	err = app.ReviewService.InsertGame(game)
 
 	if err != nil {
 		app.Log.Error(err)
