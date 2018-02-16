@@ -15,6 +15,10 @@ import (
 
 var wg sync.WaitGroup
 
+func (app *App) InitReviewController() {
+	app.ReviewService.DB = app.DB
+}
+
 //RenderIndex renders the index page
 func (app *App) RenderReviewList(w http.ResponseWriter, r *http.Request) {
 	tmplList := []string{"./web/views/base.html",
@@ -22,10 +26,7 @@ func (app *App) RenderReviewList(w http.ResponseWriter, r *http.Request) {
 		"./web/views/footer.html",
 		"./web/views/reviews/list.html"}
 
-	reviewService := models.GameServiceImpl{
-		DB: app.DB,
-	}
-	games, err := reviewService.GetAllGames()
+	games, err := app.ReviewService.GetAllGames()
 
 	if err != nil {
 		app.Log.Error(err)
@@ -57,11 +58,8 @@ type CommentChanStuct struct {
 
 func GetGame(gameChan chan GameChanStuct, id int, app *App) {
 	defer wg.Done()
-	reviewService := models.GameServiceImpl{
-		DB: app.DB,
-	}
 
-	game, err := reviewService.GameByID(id, id)
+	game, err := app.ReviewService.GameByID(id, id)
 
 	if err != nil {
 		app.Log.Error(err)

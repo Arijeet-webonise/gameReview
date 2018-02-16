@@ -87,6 +87,8 @@ func main() {
 	}
 
 	a.InitRouter()
+	a.InitReviewController()
+
 	err = http.ListenAndServe(cfg.Port, router)
 	if err != nil {
 		panic(err)
