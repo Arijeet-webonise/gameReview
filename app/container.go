@@ -11,10 +11,13 @@ import (
 
 // App enscapsulates the App environment
 type App struct {
-	Router        *bone.Mux
-	Cfg           *Config
-	Log           logger.ILogger
-	TplParser     templates.ITemplateParser
-	DB            *sql.DB
-	ReviewService *models.GameServiceImpl
+	Router                     *bone.Mux
+	Cfg                        *Config
+	Log                        logger.ILogger
+	TplParser                  templates.ITemplateParser
+	DB                         *sql.DB
+	ReviewService              *models.GameServiceImpl
+	GenretogamerelationService *models.GenretogamerelationServiceImpl
+	CommentService             *models.CommentServiceImpl
+	RatingViewService          *models.RatingViewServiceImpl
 }
