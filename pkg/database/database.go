@@ -13,8 +13,10 @@ type DatabaseWrapper struct {
 	DB *sql.DB
 }
 
-func (dw *DatabaseWrapper) Initialise(params map[string]string) (*sql.DB, error) {
+func (dw *DatabaseWrapper) Initialise(config map[string]string) (*sql.DB, error) {
 	// need to construct this URL from the params map passed
-	u, err := dburl.Open("postgresql://local:toor@127.0.0.1/gamereview")
+	connStr := config["driver"] + "://" + config["user"] + ":" + config["password"] + "@" + config["host"] + "/" + config["db"] + "?sslmode=disable"
+	u, err := dburl.Open(connStr)
+
 	return u, err
 }
