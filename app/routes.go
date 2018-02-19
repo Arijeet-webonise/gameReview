@@ -19,6 +19,9 @@ func initialiseV1API(app *App) {
 	app.Router.Post("/reviews/games/addSubmit", app.renderView(app.AddReviewsSubmit))
 	app.Router.Get("/reviews/games/:id", app.renderView(app.RenderReview))
 
+	app.Router.Get("/login", app.renderView(app.LoginRender))
+	app.Router.Post("/loginSubmit", app.renderView(app.Login))
+
 	//STATIC FILES
 	fs := http.FileServer(http.Dir("web/assets/"))
 	app.Router.Get("/static/", http.StripPrefix("/static/", fs))

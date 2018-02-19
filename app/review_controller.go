@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -253,8 +252,9 @@ func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
 		app.Log.Error(err)
 	}
 
-	fmt.Println(img)
-	fmt.Println(header)
+	if IsInArray("image/jpeg", header.Header["Content-Type"]) || IsInArray("image/jpg", header.Header["Content-Type"]) {
+		app.Log.Info("Is a Image")
+	}
 
 	f, err := os.Create("./web/assets/upload/img/" + header.Filename)
 	defer f.Close()
@@ -276,4 +276,13 @@ func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.Log.Error(err)
 	}
+}
+
+func IsInArray(target string, list []string) bool {
+	for _, item := range list {
+		if target == item {
+			return true
+		}
+	}
+	return false
 }

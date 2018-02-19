@@ -20,4 +20,5 @@ type App struct {
 	GenretogamerelationService *models.GenretogamerelationServiceImpl
 	CommentService             *models.CommentServiceImpl
 	RatingViewService          *models.RatingViewServiceImpl
+	UserService                *models.UserServiceImpl
 }
