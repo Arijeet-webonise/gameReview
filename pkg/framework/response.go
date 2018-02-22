@@ -2,7 +2,9 @@ package framework
 
 import (
 	"errors"
+	"io"
 	"net/http"
+
 )
 
 var (
@@ -53,8 +55,20 @@ func (r *Response) SetSuccess(flag bool) {
 	r.success = flag
 }
 
-func (r *Response) Error(err error) {
+func (r *Response) Error(err error, code int) {
 	r.err = err
+
+	tmplList := []string{"./web/views/base.html",
+		"./web/views/header.html",
+		"./web/views/footer.html",
+		"./web/views/error/404error.html"}
+
+	r.Header().Set("Content-Type", "text/html; charset=utf-8")
+	r.Header().Set("X-Content-Type-Options", "nosniff")
+	r.WriteHeader(code)
+
+	res, _ := app.TplParser.ParseTemplate(tmplList, nil)
+	io.WriteString(r, res)
 	//logger.E(r.err)
 }
 
