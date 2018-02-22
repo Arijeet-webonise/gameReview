@@ -21,4 +21,5 @@ type App struct {
 	CommentService             *models.CommentServiceImpl
 	RatingViewService          *models.RatingViewServiceImpl
 	UserService                *models.UserServiceImpl
+	SessionsService            *models.SessionServiceImpl
 }

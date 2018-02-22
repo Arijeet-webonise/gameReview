@@ -99,6 +99,10 @@ func main() {
 		DB: dbConn,
 	}
 
+	sessionService := &models.SessionServiceImpl{
+		DB: dbConn,
+	}
+
 	a := &app.App{
 		Router:                     router,
 		Cfg:                        cfg,
@@ -110,6 +114,7 @@ func main() {
 		CommentService:             commentService,
 		RatingViewService:          ratingViewService,
 		UserService:                userService,
+		SessionsService:            sessionService,
 	}
 
 	a.InitRouter()

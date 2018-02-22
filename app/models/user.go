@@ -12,6 +12,7 @@ type User struct {
 	ID        int            `json:"id"`        // id
 	Firstname string         `json:"firstname"` // firstname
 	Lastname  sql.NullString `json:"lastname"`  // lastname
+	Email     sql.NullString `json:"email"`     // email
 	Username  string         `json:"username"`  // username
 	Password  string         `json:"password"`  // password
 	Roles     sql.NullString `json:"roles"`     // roles
@@ -43,14 +44,14 @@ func (serviceImpl *UserServiceImpl) InsertUser(u *User) error {
 
 	// sql insert query, primary key provided by sequence
 	const sqlstr = `INSERT INTO public.users (` +
-		`firstname, lastname, username, password, roles` +
+		`firstname, lastname, email, username, password, roles` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5` +
+		`$1, $2, $3, $4, $5, $6` +
 		`) RETURNING id`
 
 	// run query
-	XOLog(sqlstr, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles)
-	err = serviceImpl.DB.QueryRow(sqlstr, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles).Scan(&u.ID)
+	XOLog(sqlstr, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles)
+	err = serviceImpl.DB.QueryRow(sqlstr, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles).Scan(&u.ID)
 	if err != nil {
 		return err
 	}
@@ -64,14 +65,14 @@ func (serviceImpl *UserServiceImpl) UpdateUser(u *User) error {
 
 	// sql query
 	const sqlstr = `UPDATE public.users SET (` +
-		`firstname, lastname, username, password, roles` +
+		`firstname, lastname, email, username, password, roles` +
 		`) = ( ` +
-		`$1, $2, $3, $4, $5` +
-		`) WHERE id = $6`
+		`$1, $2, $3, $4, $5, $6` +
+		`) WHERE id = $7`
 
 	// run query
-	XOLog(sqlstr, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles, u.ID)
-	_, err = serviceImpl.DB.Exec(sqlstr, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles, u.ID)
+	XOLog(sqlstr, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles, u.ID)
+	_, err = serviceImpl.DB.Exec(sqlstr, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles, u.ID)
 	return err
 }
 
@@ -94,18 +95,18 @@ func (serviceImpl *UserServiceImpl) UpsertUser(u *User) error {
 
 	// sql query
 	const sqlstr = `INSERT INTO public.users (` +
-		`id, firstname, lastname, username, password, roles` +
+		`id, firstname, lastname, email, username, password, roles` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5, $6` +
+		`$1, $2, $3, $4, $5, $6, $7` +
 		`) ON CONFLICT (id) DO UPDATE SET (` +
-		`id, firstname, lastname, username, password, roles` +
+		`id, firstname, lastname, email, username, password, roles` +
 		`) = (` +
-		`EXCLUDED.id, EXCLUDED.firstname, EXCLUDED.lastname, EXCLUDED.username, EXCLUDED.password, EXCLUDED.roles` +
+		`EXCLUDED.id, EXCLUDED.firstname, EXCLUDED.lastname, EXCLUDED.email, EXCLUDED.username, EXCLUDED.password, EXCLUDED.roles` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, u.ID, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles)
-	_, err = serviceImpl.DB.Exec(sqlstr, u.ID, u.Firstname, u.Lastname, u.Username, u.Password, u.Roles)
+	XOLog(sqlstr, u.ID, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles)
+	_, err = serviceImpl.DB.Exec(sqlstr, u.ID, u.Firstname, u.Lastname, u.Email, u.Username, u.Password, u.Roles)
 	if err != nil {
 		return err
 	}
@@ -149,7 +150,7 @@ func (serviceImpl *UserServiceImpl) GetAllUsers() ([]*User, error) {
 		u := User{}
 
 		// scan
-		err = q.Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Username, &u.Password, &u.Roles)
+		err = q.Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Email, &u.Username, &u.Password, &u.Roles)
 		if err != nil {
 			return nil, err
 		}
@@ -179,7 +180,7 @@ func (serviceImpl *UserServiceImpl) GetChunkedUsers(limit int, offset int) ([]*U
 		u := User{}
 
 		// scan
-		err = q.Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Username, &u.Password, &u.Roles)
+		err = q.Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Email, &u.Username, &u.Password, &u.Roles)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +199,7 @@ func (serviceImpl *UserServiceImpl) UserByID(_, id int) (*User, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, firstname, lastname, username, password, roles ` +
+		`id, firstname, lastname, email, username, password, roles ` +
 		`FROM public.users ` +
 		`WHERE id = $1`
 
@@ -207,7 +208,7 @@ func (serviceImpl *UserServiceImpl) UserByID(_, id int) (*User, error) {
 
 	u := User{}
 
-	err = serviceImpl.DB.QueryRow(sqlstr, id).Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Username, &u.Password, &u.Roles)
+	err = serviceImpl.DB.QueryRow(sqlstr, id).Scan(&u.ID, &u.Firstname, &u.Lastname, &u.Email, &u.Username, &u.Password, &u.Roles)
 	if err != nil {
 		return nil, err
 	}
