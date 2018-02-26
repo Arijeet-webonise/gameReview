@@ -2,7 +2,10 @@ package framework
 
 import (
 	"errors"
+	"io"
 	"net/http"
+
+	"github.com/Arijeet-webonise/gameReview/pkg/templates"
 )
 
 var (
@@ -53,8 +56,27 @@ func (r *Response) SetSuccess(flag bool) {
 	r.success = flag
 }
 
-func (r *Response) Error(err error) {
+func (r *Response) Error(err error, code int) {
 	r.err = err
+
+	tmplList := []string{"./web/views/base.html",
+		"./web/views/header.html",
+		"./web/views/footer.html",
+		"./web/views/error/error.html"}
+
+	r.Header().Set("Content-Type", "text/html; charset=utf-8")
+	r.Header().Set("X-Content-Type-Options", "nosniff")
+	r.WriteHeader(code)
+
+	data := struct {
+		Msg  string
+		Code int
+	}{err.Error(), code}
+
+	temp := &templates.TemplateParser{}
+	res, _ := temp.ParseTemplate(tmplList, data)
+	//r.Write([]byte(res))
+	io.WriteString(r.ResponseWriter, res)
 	//logger.E(r.err)
 }
 

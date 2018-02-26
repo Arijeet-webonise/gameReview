@@ -8,6 +8,9 @@ func (app *App) InitRouter() {
 }
 
 func initialiseV1API(app *App) {
+
+	app.Router.NotFoundFunc(app.renderView(app.Handler404Error))
+
 	//REST API
 	app.Router.Get("/api/ping", app.handle(app.ping))
 	// app.Router.Get("/api/todo/", app.handle(app.GetAllTodos))
@@ -17,7 +20,14 @@ func initialiseV1API(app *App) {
 	app.Router.Get("/reviews/games/commentSubmit", app.renderView(app.SubmitComments))
 	app.Router.Get("/reviews/games/add", app.renderView(app.AddReviews))
 	app.Router.Post("/reviews/games/addSubmit", app.renderView(app.AddReviewsSubmit))
-	app.Router.Get("/reviews/games/:id", app.renderView(app.RenderReview))
+	//app.Router.Get("/reviews/games/:id", app.renderView(app.RenderReview))
+	app.Router.Get("/reviews/games/:id", app.renderSecureView(app.RenderReview))
+
+	app.Router.Get("/login", app.renderView(app.LoginRender))
+	app.Router.Post("/loginSubmit", app.renderView(app.Login))
+	app.Router.Get("/signup", app.renderView(app.SignUpRender))
+	app.Router.Post("/signupSubmit", app.renderView(app.SignUpSubmit))
+	app.Router.Get("/logout", app.renderView(app.Logout))
 
 	//STATIC FILES
 	fs := http.FileServer(http.Dir("web/assets/"))

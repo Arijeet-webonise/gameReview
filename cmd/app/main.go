@@ -95,6 +95,14 @@ func main() {
 		DB: dbConn,
 	}
 
+	userService := &models.UserServiceImpl{
+		DB: dbConn,
+	}
+
+	sessionService := &models.SessionServiceImpl{
+		DB: dbConn,
+	}
+
 	a := &app.App{
 		Router:                     router,
 		Cfg:                        cfg,
@@ -105,6 +113,8 @@ func main() {
 		GenretogamerelationService: ggrs,
 		CommentService:             commentService,
 		RatingViewService:          ratingViewService,
+		UserService:                userService,
+		SessionsService:            sessionService,
 	}
 
 	a.InitRouter()
