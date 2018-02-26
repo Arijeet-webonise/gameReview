@@ -39,25 +39,26 @@ func (app *App) SignUpRender(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, res)
 }
 
-func (app *App) CheckIfLogined(r *http.Request) error {
+func (app *App) GetCurrrentUser(r *http.Request) (*models.User, error) {
 	cookie, err := r.Cookie("auth")
+	var user *models.User
 
 	if err != nil {
-		return err
+		return user, err
 	}
 
 	session, err := app.SessionsService.SessionByUUID(cookie.Value, cookie.Value)
 
 	if err != nil {
-		return err
+		return user, err
 	}
 
-	_, err = app.UserService.UserByID(session.Userid, session.Userid)
+	user, err = app.UserService.UserByID(session.Userid, session.Userid)
 
 	if err != nil {
-		return err
+		return user, err
 	}
-	return nil
+	return user, nil
 }
 
 func (app *App) SignUpSubmit(w http.ResponseWriter, r *http.Request) {

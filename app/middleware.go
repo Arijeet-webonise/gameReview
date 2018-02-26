@@ -26,7 +26,7 @@ func (app *App) renderView(viewHandler func(w http.ResponseWriter, req *http.Req
 
 func (app *App) renderSecureView(viewHandler func(w http.ResponseWriter, req *http.Request)) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := app.CheckIfLogined(r)
+		_, err := app.GetCurrrentUser(r)
 		if err != nil {
 			app.Log.Error(err)
 			app.Handler404Error(w, r)
