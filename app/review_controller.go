@@ -9,13 +9,14 @@ import (
 	"sync"
 
 	"github.com/Arijeet-webonise/gameReview/app/models"
+	"github.com/Arijeet-webonise/gameReview/pkg/framework"
 	"github.com/go-zoo/bone"
 )
 
 var wg sync.WaitGroup
 
 //RenderIndex renders the index page
-func (app *App) RenderReviewList(w http.ResponseWriter, r *http.Request) {
+func (app *App) RenderReviewList(w *framework.Response, r *framework.Request) {
 	tmplList := []string{"./web/views/base.html",
 		"./web/views/header.html",
 		"./web/views/footer.html",
@@ -36,7 +37,7 @@ func (app *App) RenderReviewList(w http.ResponseWriter, r *http.Request) {
 		app.Log.Error(err)
 	}
 
-	io.WriteString(w, res)
+	io.WriteString(w.ResponseWriter, res)
 }
 
 type GameChanStuct struct {
@@ -114,7 +115,7 @@ func GetUserRating(userRating chan int, app *App, gameid int) {
 	userRating <- int(float64(rating.TotalRating.Int64) / float64(rating.Count.Int64*10) * 100)
 }
 
-func (app *App) SubmitComments(w http.ResponseWriter, r *http.Request) {
+func (app *App) SubmitComments(w *framework.Response, r *framework.Request) {
 	err := r.ParseForm()
 
 	if err != nil {
@@ -147,16 +148,16 @@ func (app *App) SubmitComments(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
+func (app *App) RenderReview(w *framework.Response, r *framework.Request) {
 	tmplList := []string{"./web/views/base.html",
 		"./web/views/header.html",
 		"./web/views/footer.html",
 		"./web/views/reviews/item.html"}
 
-	id, err := strconv.Atoi(bone.GetValue(r, "id"))
+	id, err := strconv.Atoi(bone.GetValue(r.Request, "id"))
 	if err != nil {
 		app.Log.Error(err)
-		app.Router.HandleNotFound(w, r)
+		app.Router.HandleNotFound(w.ResponseWriter, r.Request)
 		return
 	}
 
@@ -168,7 +169,7 @@ func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
 	games, err := GetGame(id, app)
 	if err != nil {
 		app.Log.Error(err)
-		app.Router.HandleNotFound(w, r)
+		w.Error(err, http.StatusNotFound)
 		return
 	}
 
@@ -213,14 +214,14 @@ func (app *App) RenderReview(w http.ResponseWriter, r *http.Request) {
 		app.Log.Error(err)
 	}
 
-	_, err = io.WriteString(w, res)
+	_, err = io.WriteString(w.ResponseWriter, res)
 
 	if err != nil {
 		app.Log.Error(err)
 	}
 }
 
-func (app *App) AddReviews(w http.ResponseWriter, r *http.Request) {
+func (app *App) AddReviews(w *framework.Response, r *framework.Request) {
 	tmplList := []string{"./web/views/base.html",
 		"./web/views/header.html",
 		"./web/views/footer.html",
@@ -232,21 +233,21 @@ func (app *App) AddReviews(w http.ResponseWriter, r *http.Request) {
 		app.Log.Error(err)
 	}
 
-	_, err = io.WriteString(w, res)
+	_, err = io.WriteString(w.ResponseWriter, res)
 
 	if err != nil {
 		app.Log.Error(err)
 	}
 }
 
-func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(800)
+func (app *App) AddReviewsSubmit(w *framework.Response, r *framework.Request) {
+	err := r.Request.ParseMultipartForm(800)
 
 	if err != nil {
 		app.Log.Error(err)
-		r.Response.StatusCode = http.StatusNotFound
+		// r.Response.StatusCode = http.StatusNotFound
 	}
-	img, header, err := r.FormFile("reviewimage")
+	img, header, err := r.Request.FormFile("reviewimage")
 
 	if err != nil {
 		app.Log.Error(err)
@@ -264,10 +265,10 @@ func (app *App) AddReviewsSubmit(w http.ResponseWriter, r *http.Request) {
 	io.Copy(f, img)
 
 	game := &models.Game{
-		Title:     r.Form.Get("title"),
-		Summary:   sql.NullString{String: r.Form.Get("addReview"), Valid: true},
-		Developer: sql.NullString{String: r.Form.Get("developer"), Valid: true},
-		Rating:    r.Form.Get("rating"),
+		Title:     r.Request.Form.Get("title"),
+		Summary:   sql.NullString{String: r.Request.Form.Get("addReview"), Valid: true},
+		Developer: sql.NullString{String: r.Request.Form.Get("developer"), Valid: true},
+		Rating:    r.Request.Form.Get("rating"),
 		ImageName: sql.NullString{String: header.Filename, Valid: true},
 	}
 
