@@ -103,14 +103,14 @@ func (app *App) Login(w *framework.Response, r *framework.Request) {
 		if err != nil {
 			app.Log.Error(err)
 			err = errors.New("Username and/or password do not match")
-			app.HandlerError(w.ResponseWriter, r.Request, err, http.StatusForbidden)
+			w.Error(err, http.StatusForbidden)
 			return
 		}
 
 		if user.Password != password {
 			app.Log.Error(err)
 			err = errors.New("Username and/or password do not match")
-			app.HandlerError(w.ResponseWriter, r.Request, err, http.StatusForbidden)
+			w.Error(err, http.StatusForbidden)
 			return
 		}
 
@@ -158,7 +158,7 @@ func (app *App) Logout(w *framework.Response, r *framework.Request) {
 
 	if err != nil {
 		app.Log.Error(err)
-		app.HandlerError(w.ResponseWriter, r.Request, err, http.StatusForbidden)
+		w.Error(err, http.StatusForbidden)
 		return
 	}
 

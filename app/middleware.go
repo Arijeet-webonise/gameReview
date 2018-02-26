@@ -35,7 +35,7 @@ func (app *App) renderSecureView(handler func(*framework.Response, *framework.Re
 		_, err := app.GetCurrrentUser(r)
 		if err != nil {
 			app.Log.Error(err)
-			res.Error(err, http.StatusNotFound)
+			res.Error(err, http.StatusForbidden)
 			return
 		}
 		handler(&res, &req)
