@@ -9,7 +9,7 @@ func (app *App) InitRouter() {
 
 func initialiseV1API(app *App) {
 
-	app.Router.NotFoundFunc(app.renderView(app.Handler404Error))
+	// app.Router.NotFoundFunc(app.renderView(app.Handler404Error))
 
 	//REST API
 	app.Router.Get("/api/ping", app.handle(app.ping))

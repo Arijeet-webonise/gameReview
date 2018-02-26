@@ -56,13 +56,16 @@ func (r *Response) SetSuccess(flag bool) {
 	r.success = flag
 }
 
-func (r *Response) Error(err error, code int) {
+func (r *Response) Error(err error, code int, tmplList ...string) {
 	r.err = err
+	r.statusCode = code
 
-	tmplList := []string{"./web/views/base.html",
-		"./web/views/header.html",
-		"./web/views/footer.html",
-		"./web/views/error/error.html"}
+	if len(tmplList) == 0 {
+		tmplList = []string{"./pkg/framework/view/base.html",
+			"./pkg/framework/view/header.html",
+			"./pkg/framework/view/footer.html",
+			"./pkg/framework/view/error/error.html"}
+	}
 
 	r.Header().Set("Content-Type", "text/html; charset=utf-8")
 	r.Header().Set("X-Content-Type-Options", "nosniff")

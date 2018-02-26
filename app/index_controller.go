@@ -2,11 +2,12 @@ package app
 
 import (
 	"io"
-	"net/http"
+
+	"github.com/Arijeet-webonise/gameReview/pkg/framework"
 )
 
 //RenderIndex renders the index page
-func (app *App) RenderIndex(w http.ResponseWriter, r *http.Request) {
+func (app *App) RenderIndex(w *framework.Response, r *framework.Request) {
 	tmplList := []string{"./web/views/base.html",
 		"./web/views/header.html",
 		"./web/views/footer.html",
@@ -15,5 +16,5 @@ func (app *App) RenderIndex(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.Log.Error(err)
 	}
-	io.WriteString(w, res)
+	io.WriteString(w.ResponseWriter, res)
 }
