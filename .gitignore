@@ -5,4 +5,4 @@ debug
 ./build.sh
 
 *dbconf.yml
-./assets/upload/*
+web/assets/upload/
