@@ -11,31 +11,44 @@
     <summary class="well comment">
       {{ .Game.Summary.String }}
     </summary>
+{{ if .Game.VideoType.Valid }}
+  {{ if eq .Game.VideoType.String "youtube" }}
     <video id="my-video" class="video-js" controls preload="auto" width="640" height="264"
-  data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube", "src": "https://www.youtube.com/watch?v=VFvc-JdChk0"}] }'
+  data-setup='{ "techOrder": ["youtube"], "sources": [{ "type": "video/youtube", "src": "{{ .Game.Video.String }}"}] }'
   >
   </video>
+  {{ else }}
+  <video id="my-video" class="video-js" controls preload="auto" width="640" height="264" data-setup="{}">
+    <source src="/static/upload/video/{{ .Game.Video.String }}" type='video/mp4'>
+    <p class="vjs-no-js">
+      To view this video please enable JavaScript, and consider upgrading to a web browser that
+      <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+    </p>
+  </video>
+  {{ end }}
+{{ end }}
     <div>
       <form action="commentSubmit" method="get">
         <input type="hidden" name="id" value="{{ .Game.ID }}">
-        Rating:
-        <div class="form-group">
-          <input type="hidden" name="rating" id="rating" class="form-control">
-          <div class="btn-group">
-            <button type="button" class="btn btn-primary ratingBtn">1</button>
-            <button type="button" class="btn btn-primary ratingBtn">2</button>
-            <button type="button" class="btn btn-primary ratingBtn">3</button>
-            <button type="button" class="btn btn-primary ratingBtn">4</button>
-            <button type="button" class="btn btn-primary ratingBtn">5</button>
-            <button type="button" class="btn btn-primary ratingBtn">6</button>
-            <button type="button" class="btn btn-primary ratingBtn">7</button>
-            <button type="button" class="btn btn-primary ratingBtn">8</button>
-            <button type="button" class="btn btn-primary ratingBtn">9</button>
-            <button type="button" class="btn btn-primary ratingBtn">10</button>
-          </div>
+        <div class="form-group" id="rating-control">
+          <label class="rating_label">Rating</label>
+          <fieldset class="rating">
+            <input type="radio" id="star5" name="rating" value="10" /><label class = "full" for="star5" title="Awesome - 5 stars"></label>
+            <input type="radio" id="star4half" name="rating" value="9" /><label class="half" for="star4half" title="Pretty good - 4.5 stars"></label>
+            <input type="radio" id="star4" name="rating" value="8" /><label class = "full" for="star4" title="Pretty good - 4 stars"></label>
+            <input type="radio" id="star3half" name="rating" value="7" /><label class="half" for="star3half" title="Meh - 3.5 stars"></label>
+            <input type="radio" id="star3" name="rating" value="6" /><label class = "full" for="star3" title="Meh - 3 stars"></label>
+            <input type="radio" id="star2half" name="rating" value="5" /><label class="half" for="star2half" title="Kinda bad - 2.5 stars"></label>
+            <input type="radio" id="star2" name="rating" value="5" /><label class = "full" for="star2" title="Kinda bad - 2 stars"></label>
+            <input type="radio" id="star1half" name="rating" value="4" /><label class="half" for="star1half" title="Meh - 1.5 stars"></label>
+            <input type="radio" id="star1" name="rating" value="2" /><label class = "full" for="star1" title="Sucks big time - 1 star"></label>
+            <input type="radio" id="starhalf" name="rating" value="1" /><label class="half" for="starhalf" title="Sucks big time - 0.5 stars"></label>
+          </fieldset>
         </div>
+        <div class="form-group">
         <textarea name="comment" id="editor">
         </textarea><br>
+      </div>
         <input type="submit" name="submit" class="btn">
       </form>
     </div>
@@ -52,9 +65,9 @@
   <div class="col-sm-4">
     <img src="/static/upload/img/{{ .Game.ImageName.String }}">
     <h2>{{ .Game.Title }}</h2>
-    <div>User Rating: {{ .Rating }}</div>
+    <div>User Rating: {{ .Rating }}%</div>
     <div>Developed By: {{ .Game.Developer.String }}</div>
-    <div>Rating: <a href="http://www.esrb.org/ratings/ratings_guide.aspx"><img src="https://esrbstorage.blob.core.windows.net/esrbcontent/images/{{ .Game.Rating }}.png" alt="{{ .Game.Rating }} rating"></a> </div>
+    <div>Rating: <a href="http://www.esrb.org/ratings/ratings_guide.aspx"><img src="/static/img/{{ .Game.Rating }}.png" alt="{{ .Game.Rating }} rating"></a> </div>
     <div>
       Genre: {{ range $i, $g := .Genres }}{{ if eq $i 0 }}{{else}}, {{ end }}{{ $g.Name }}{{ end }}
     </div>
