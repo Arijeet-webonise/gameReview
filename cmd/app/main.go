@@ -103,6 +103,10 @@ func main() {
 		DB: dbConn,
 	}
 
+	genreService := &models.GenreServiceImpl{
+		DB: dbConn,
+	}
+
 	a := &app.App{
 		Router:                     router,
 		Cfg:                        cfg,
@@ -111,6 +115,7 @@ func main() {
 		DB:                         dbConn,
 		ReviewService:              reviewService,
 		GenretogamerelationService: ggrs,
+		GenreService:               genreService,
 		CommentService:             commentService,
 		RatingViewService:          ratingViewService,
 		UserService:                userService,

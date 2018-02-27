@@ -1,5 +1,11 @@
 
 {{ define "content" }}
+<link href="/static/css/materialize-tags/materialize-tags.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+<script src="/static/js/materialize-tags/materialize-tags.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
 <div class="container">
   <form action="addSubmit" method="post" enctype="multipart/form-data">
     <div class="form-group">
@@ -21,17 +27,33 @@
         <option value="eC">Early Childhood (eC)</option>
         <option value="E">Everyone (E)</option>
         <option value="E10">Everyone 10+ (E10+)</option>
-        <option value="E10">Teen (T)</option>
-        <option value="m17">Mature (M17+)</option>
+        <option value="T">Teen (T)</option>
+        <option value="m">Mature (M17+)</option>
         <option value="Ao">Adults (Ao)</option>
       </select>
     </div>
     <div class="form-group">
+      <label>Tags</label>
+      <input type="text" name="tags" id="tags" class="tags form-control" data-role="materialtags">
+    </div>
+    <div class="form-group">
+      <label>Video Type</label>
+      <select name="vtype" class="form-control" id="videoType">
+        <option value="youtube">YouTube</option>
+        <option value="upload">Upload</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Video</label>
+      <input type="text" name="video" accept="video/*" name="video" class="form-control" id="video-input">
+    </div>
+    <div class="form-group">
       <label>Image</label>
-      <input type="file" name="reviewimage" class="form-control">
+      <input type="file" name="reviewimage" class="form-control" accept="image/*">
     </div>
     <button type="submit" name="submit" class="btn">Submit</button>
   </form>
+  <i class="fas fa-times"></i>
 </div>
   <script>
     ClassicEditor
@@ -39,5 +61,18 @@
       .catch(error => {
         console.error(error);
       });
+
+    $(document).ready(function () {
+      $("#videoType").change(function (e) {
+        $this = $(this);
+        switch ($this.val()) {
+          case "upload":
+            $("#video-input").attr("type", "file");
+            break;
+          default:
+            $("#video-input").attr("type", "text");
+        }
+      });
+    });
   </script>
 {{end}}

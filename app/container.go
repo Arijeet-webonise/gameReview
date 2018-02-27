@@ -19,6 +19,7 @@ type App struct {
 	ReviewService              *models.GameServiceImpl
 	GenretogamerelationService *models.GenretogamerelationServiceImpl
 	CommentService             *models.CommentServiceImpl
+	GenreService               *models.GenreServiceImpl
 	RatingViewService          *models.RatingViewServiceImpl
 	UserService                *models.UserServiceImpl
 	SessionsService            *models.SessionServiceImpl

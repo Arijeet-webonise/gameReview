@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/Arijeet-webonise/gameReview/app/models"
@@ -111,6 +112,8 @@ func GetUserRating(userRating chan int, app *App, gameid int) {
 
 	if err != nil {
 		app.Log.Error(err)
+		userRating <- 0
+		return
 	}
 	userRating <- int(float64(rating.TotalRating.Int64) / float64(rating.Count.Int64*10) * 100)
 }
@@ -145,6 +148,8 @@ func (app *App) SubmitComments(w *framework.Response, r *framework.Request) {
 	if err != nil {
 		app.Log.Error(err)
 	}
+
+	http.Redirect(w.ResponseWriter, r.Request, "/reviews/games/"+r.Form.Get("id"), http.StatusSeeOther)
 
 }
 
@@ -264,11 +269,30 @@ func (app *App) AddReviewsSubmit(w *framework.Response, r *framework.Request) {
 	}
 	io.Copy(f, img)
 
+	var vidname string
+	if r.Request.Form.Get("vtype") == "upload" {
+		vid, headerVid, err := r.Request.FormFile("video")
+
+		if err != nil {
+			app.Log.Error(err)
+		}
+
+		f1, err := os.Create("./web/assets/upload/video/" + headerVid.Filename)
+		defer f1.Close()
+		if err != nil {
+			app.Log.Error(err)
+		}
+		io.Copy(f1, vid)
+		vidname = headerVid.Filename
+	}
+
 	game := &models.Game{
 		Title:     r.Request.Form.Get("title"),
 		Summary:   sql.NullString{String: r.Request.Form.Get("addReview"), Valid: true},
 		Developer: sql.NullString{String: r.Request.Form.Get("developer"), Valid: true},
 		Rating:    r.Request.Form.Get("rating"),
+		Video:     sql.NullString{String: vidname, Valid: true},
+		VideoType: sql.NullString{String: r.Request.Form.Get("vtype"), Valid: true},
 		ImageName: sql.NullString{String: header.Filename, Valid: true},
 	}
 
@@ -277,6 +301,37 @@ func (app *App) AddReviewsSubmit(w *framework.Response, r *framework.Request) {
 	if err != nil {
 		app.Log.Error(err)
 	}
+
+	tags := strings.Split(r.Request.Form.Get("tags"), ",")
+
+	game, err = app.ReviewService.FindGameByTitle(game.Title, game.Title)
+
+	if err != nil {
+		app.Log.Error(err)
+	}
+
+	for _, tag := range tags {
+		genre, err := app.GenreService.GenreByName(tag, tag)
+		if err != nil {
+			genre = &models.Genre{
+				Name: tag,
+			}
+			app.GenreService.InsertGenre(genre)
+
+			genre, err = app.GenreService.GenreByName(tag, tag)
+
+			if err != nil {
+				app.Log.Error(err)
+			}
+		}
+
+		g := &models.Genretogamerelation{
+			Game:  sql.NullInt64{Int64: int64(game.ID), Valid: true},
+			Genre: sql.NullInt64{Int64: int64(genre.ID), Valid: true},
+		}
+		app.GenretogamerelationService.InsertGenretogamerelation(g)
+	}
+
 }
 
 func IsInArray(target string, list []string) bool {
