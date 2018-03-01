@@ -11,7 +11,12 @@ type ITemplateParser interface {
 
 func (tp *TemplateParser) ParseTemplate(templateFileName []string, data interface{}) (string, error) {
 	var parsedTemplate string
-	t, err := template.ParseFiles(templateFileName...)
+
+	funcMap := template.FuncMap{
+		"TestFunc": TestFunc,
+	}
+
+	t, err := template.New("titleTest").Funcs(funcMap).ParseFiles(templateFileName...)
 	if err != nil {
 		return parsedTemplate, err
 	}
@@ -24,4 +29,11 @@ func (tp *TemplateParser) ParseTemplate(templateFileName []string, data interfac
 }
 
 type TemplateParser struct {
+}
+
+func TestFunc(num int) bool {
+	if num == 0 {
+		return true
+	}
+	return false
 }
