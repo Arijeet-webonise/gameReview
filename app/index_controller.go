@@ -39,7 +39,7 @@ func (app *App) RenderPDFIndex(w http.ResponseWriter, r *http.Request) {
 
 	hpdf.AddPage(res)
 
-	if err := hpdf.Generate(w); err != nil {
+	if err := hpdf.Generate2(w); err != nil {
 		app.Log.Info(err)
 	}
 }
