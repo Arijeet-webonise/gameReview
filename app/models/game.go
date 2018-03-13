@@ -15,6 +15,8 @@ type Game struct {
 	Summary   sql.NullString `json:"summary"`    // summary
 	Rating    string         `json:"rating"`     // rating
 	ImageName sql.NullString `json:"image_name"` // image_name
+	Video     sql.NullString `json:"video"`      // video
+	VideoType sql.NullString `json:"video_type"` // video_type
 
 }
 
@@ -43,14 +45,14 @@ func (serviceImpl *GameServiceImpl) InsertGame(g *Game) error {
 
 	// sql insert query, primary key provided by sequence
 	const sqlstr = `INSERT INTO public.games (` +
-		`title, developer, summary, rating, image_name` +
+		`title, developer, summary, rating, image_name, video, video_type` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5` +
+		`$1, $2, $3, $4, $5, $6, $7` +
 		`) RETURNING id`
 
 	// run query
-	XOLog(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName)
-	err = serviceImpl.DB.QueryRow(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName).Scan(&g.ID)
+	XOLog(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType)
+	err = serviceImpl.DB.QueryRow(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType).Scan(&g.ID)
 	if err != nil {
 		return err
 	}
@@ -64,14 +66,14 @@ func (serviceImpl *GameServiceImpl) UpdateGame(g *Game) error {
 
 	// sql query
 	const sqlstr = `UPDATE public.games SET (` +
-		`title, developer, summary, rating, image_name` +
+		`title, developer, summary, rating, image_name, video, video_type` +
 		`) = ( ` +
-		`$1, $2, $3, $4, $5` +
-		`) WHERE id = $6`
+		`$1, $2, $3, $4, $5, $6, $7` +
+		`) WHERE id = $8`
 
 	// run query
-	XOLog(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.ID)
-	_, err = serviceImpl.DB.Exec(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.ID)
+	XOLog(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType, g.ID)
+	_, err = serviceImpl.DB.Exec(sqlstr, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType, g.ID)
 	return err
 }
 
@@ -94,18 +96,18 @@ func (serviceImpl *GameServiceImpl) UpsertGame(g *Game) error {
 
 	// sql query
 	const sqlstr = `INSERT INTO public.games (` +
-		`id, title, developer, summary, rating, image_name` +
+		`id, title, developer, summary, rating, image_name, video, video_type` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5, $6` +
+		`$1, $2, $3, $4, $5, $6, $7, $8` +
 		`) ON CONFLICT (id) DO UPDATE SET (` +
-		`id, title, developer, summary, rating, image_name` +
+		`id, title, developer, summary, rating, image_name, video, video_type` +
 		`) = (` +
-		`EXCLUDED.id, EXCLUDED.title, EXCLUDED.developer, EXCLUDED.summary, EXCLUDED.rating, EXCLUDED.image_name` +
+		`EXCLUDED.id, EXCLUDED.title, EXCLUDED.developer, EXCLUDED.summary, EXCLUDED.rating, EXCLUDED.image_name, EXCLUDED.video, EXCLUDED.video_type` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, g.ID, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName)
-	_, err = serviceImpl.DB.Exec(sqlstr, g.ID, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName)
+	XOLog(sqlstr, g.ID, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType)
+	_, err = serviceImpl.DB.Exec(sqlstr, g.ID, g.Title, g.Developer, g.Summary, g.Rating, g.ImageName, g.Video, g.VideoType)
 	if err != nil {
 		return err
 	}
@@ -149,7 +151,7 @@ func (serviceImpl *GameServiceImpl) GetAllGames() ([]*Game, error) {
 		g := Game{}
 
 		// scan
-		err = q.Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName)
+		err = q.Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName, &g.Video, &g.VideoType)
 		if err != nil {
 			return nil, err
 		}
@@ -179,7 +181,7 @@ func (serviceImpl *GameServiceImpl) GetChunkedGames(limit int, offset int) ([]*G
 		g := Game{}
 
 		// scan
-		err = q.Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName)
+		err = q.Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName, &g.Video, &g.VideoType)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +200,7 @@ func (serviceImpl *GameServiceImpl) GameByID(_, id int) (*Game, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, title, developer, summary, rating, image_name ` +
+		`id, title, developer, summary, rating, image_name, video, video_type ` +
 		`FROM public.games ` +
 		`WHERE id = $1`
 
@@ -207,7 +209,7 @@ func (serviceImpl *GameServiceImpl) GameByID(_, id int) (*Game, error) {
 
 	g := Game{}
 
-	err = serviceImpl.DB.QueryRow(sqlstr, id).Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName)
+	err = serviceImpl.DB.QueryRow(sqlstr, id).Scan(&g.ID, &g.Title, &g.Developer, &g.Summary, &g.Rating, &g.ImageName, &g.Video, &g.VideoType)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Arijeet-webonise/gameReview/app/models"
@@ -24,6 +25,112 @@ func encrypt(text string) string {
 	bs := h.Sum(nil)
 
 	return fmt.Sprintf("%x", bs)
+}
+
+func (app *App) RenderForgotPassword(w http.ResponseWriter, r *http.Request) {
+	tmplList := []string{"./web/views/base.html",
+		"./web/views/header.html",
+		"./web/views/footer.html",
+		"./web/views/User/fpassword.html"}
+
+	res, err := app.TplParser.ParseTemplate(tmplList, nil)
+	if err != nil {
+		app.Log.Error(err)
+	}
+	io.WriteString(w, res)
+}
+
+func (app *App) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	username := r.FormValue("user")
+
+	user, err := app.UserService.FindByUsername(username)
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	uid, err := uuid.NewV4()
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	passlink := uid.String()
+
+	user.Resetpasswordlink = sql.NullString{String: passlink, Valid: true}
+	err = app.UserService.UpdateUser(user)
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	if err := app.Mail([]string{"arijeettheking@gmail.com"}, "password is:"+passlink); err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *App) ForgotPassword2(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		app.Log.Error(err)
+	}
+
+	pass := r.FormValue("pass")
+	cpass := r.FormValue("cpass")
+	username := r.FormValue("user")
+
+	if pass != cpass {
+		err := errors.New("Password is not matching")
+		app.Log.Error(err)
+		return
+	}
+
+	user, err := app.UserService.FindByUsername(username)
+
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+
+	user.Password = encrypt(pass)
+	if err := app.UserService.UpdateUser(user); err != nil {
+		app.Log.Error(err)
+	}
+
+}
+
+func (app *App) Mail(to []string, msg string) error {
+	return app.Mailer.SendMail(to, "Forgot Password:"+msg)
+}
+
+func (app *App) ForgotPasswordPage(w http.ResponseWriter, r *http.Request) {
+	tmplList := []string{"./web/views/base.html",
+		"./web/views/header.html",
+		"./web/views/footer.html",
+		"./web/views/User/fpassword2.html"}
+	resetLink := r.FormValue("reset")
+	user, err := app.UserService.FindByResetLink(resetLink)
+	if err != nil {
+		app.Log.Error(err)
+		return
+	}
+	data := &struct {
+		User string
+	}{user.Username}
+
+	res, err := app.TplParser.ParseTemplate(tmplList, data)
+	if err != nil {
+		app.Log.Error(err)
+	}
+	io.WriteString(w, res)
 }
 
 func (app *App) SignUpRender(w http.ResponseWriter, r *http.Request) {
@@ -47,13 +154,17 @@ func (app *App) GetCurrrentUser(r *http.Request) (*models.User, error) {
 		return user, err
 	}
 
-	session, err := app.SessionsService.SessionByUUID(cookie.Value, cookie.Value)
+	// session, err := app.SessionsService.SessionByUUID(cookie.Value, cookie.Value)
+
+	useridstr, err := app.Redis.Get(cookie.Value)
 
 	if err != nil {
 		return user, err
 	}
 
-	user, err = app.UserService.UserByID(session.Userid, session.Userid)
+	userid, err := strconv.Atoi(useridstr)
+
+	user, err = app.UserService.UserByID(userid, userid)
 
 	if err != nil {
 		return user, err
@@ -95,7 +206,7 @@ func (app *App) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		username := r.FormValue("username")
-		password := encrypt(r.FormValue("password"))
+		// password := encrypt(r.FormValue("password"))
 
 		user, err := app.UserService.FindByUsername(username)
 
@@ -106,12 +217,12 @@ func (app *App) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if user.Password != password {
-			app.Log.Error(err)
-			err = errors.New("Username and/or password do not match")
-			app.HandlerError(w, r, err, http.StatusForbidden)
-			return
-		}
+		// if user.Password != password {
+		// 	app.Log.Error(err)
+		// 	err = errors.New("Username and/or password do not match")
+		// 	app.HandlerError(w, r, err, http.StatusForbidden)
+		// 	return
+		// }
 
 		uid, err := uuid.NewV4()
 		if err != nil {
@@ -125,12 +236,16 @@ func (app *App) Login(w http.ResponseWriter, r *http.Request) {
 
 		http.SetCookie(w, newCookie)
 
-		sessionObj := &models.Session{
-			UUID:   uid.String(),
-			Userid: user.ID,
-		}
+		// sessionObj := &models.Session{
+		// 	UUID:   uid.String(),
+		// 	Userid: user.ID,
+		// }
+		//
+		// if err = app.SessionsService.UpsertSession(sessionObj); err != nil {
+		// 	app.Log.Error(err)
+		// }
 
-		if err = app.SessionsService.UpsertSession(sessionObj); err != nil {
+		if err = app.Redis.Set(uid.String(), user.ID, time.Hour); err != nil {
 			app.Log.Error(err)
 		}
 

@@ -4,7 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/Arijeet-webonise/gameReview/app/models"
+	"github.com/Arijeet-webonise/gameReview/pkg/goredis"
 	"github.com/Arijeet-webonise/gameReview/pkg/logger"
+	"github.com/Arijeet-webonise/gameReview/pkg/mailer"
 	"github.com/Arijeet-webonise/gameReview/pkg/templates"
 	"github.com/go-zoo/bone"
 )
@@ -16,6 +18,8 @@ type App struct {
 	Log                        logger.ILogger
 	TplParser                  templates.ITemplateParser
 	DB                         *sql.DB
+	Mailer                     *mailer.Mailer
+	Redis                      *goredis.RedisClient
 	ReviewService              *models.GameServiceImpl
 	GenretogamerelationService *models.GenretogamerelationServiceImpl
 	CommentService             *models.CommentServiceImpl

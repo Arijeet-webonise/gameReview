@@ -8,7 +8,9 @@ import (
 	"github.com/Arijeet-webonise/gameReview/app"
 	"github.com/Arijeet-webonise/gameReview/app/models"
 	"github.com/Arijeet-webonise/gameReview/pkg/database"
+	"github.com/Arijeet-webonise/gameReview/pkg/goredis"
 	"github.com/Arijeet-webonise/gameReview/pkg/logger"
+	"github.com/Arijeet-webonise/gameReview/pkg/mailer"
 	"github.com/Arijeet-webonise/gameReview/pkg/templates"
 	"github.com/go-zoo/bone"
 	"gopkg.in/yaml.v2"
@@ -103,12 +105,33 @@ func main() {
 		DB: dbConn,
 	}
 
+	mailer := &mailer.Mailer{
+		From:     "arijeet.baruah@weboniselab.com",
+		Password: "1902Anchit1@3",
+		Host:     "smtp.gmail.com",
+		Port:     25,
+	}
+
+	redisConfig := make(map[string]string, 0)
+
+	redisConfig["Addr"] = "localhost:6379"
+	redisConfig["Password"] = ""
+	redisConfig["DB"] = "0"
+
+	redisClient, err := goredis.NewClient(redisConfig)
+
+	if err != nil {
+		panic(err)
+	}
+
 	a := &app.App{
 		Router:                     router,
 		Cfg:                        cfg,
 		Log:                        log,
 		TplParser:                  &templates.TemplateParser{},
 		DB:                         dbConn,
+		Mailer:                     mailer,
+		Redis:                      redisClient,
 		ReviewService:              reviewService,
 		GenretogamerelationService: ggrs,
 		CommentService:             commentService,
